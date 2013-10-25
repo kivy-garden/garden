@@ -1,4 +1,7 @@
-from distutils.core import setup
+from ez_setup import use_setuptools
+use_setuptools()
+
+from setuptools import setup
 
 setup(
         name='Kivy Garden',
