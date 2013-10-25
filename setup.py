@@ -7,6 +7,7 @@ setup(
         name='Kivy Garden',
         version='0.1',
         license='MIT',
-        scripts=['garden', 'garden.bat'],
+        packages=['garden'],
+        scripts=['bin/garden', 'bin/garden.bat'],
         install_requires=['requests'],
         )
