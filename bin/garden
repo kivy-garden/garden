@@ -68,7 +68,12 @@ class GardenTool(object):
 
         self.options = options = parser.parse_args(argv)
 
-        options.func()
+        if hasattr(options, 'func'):
+            options.func()
+
+        # No cmd supplied, print help message
+        else:
+            parser.print_help()
 
     def cmd_list(self):
         directory = garden_app_dir if self.options.app else garden_system_dir
