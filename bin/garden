@@ -9,12 +9,12 @@ from os import listdir, getcwd, chdir, makedirs
 from os.path import join, realpath, exists, isdir, expanduser
 
 try:
-    from cStringIO import StringIO
+    from cBytesIO import BytesIO
 except ImportError:
     try:
-        from StringIO import StringIO
+        from BytesIO import BytesIO
     except ImportError:
-        from io import StringIO
+        from io import BytesIO
 
 try:
     import requests
@@ -68,7 +68,12 @@ class GardenTool(object):
 
         self.options = options = parser.parse_args(argv)
 
-        options.func()
+        if hasattr(options, 'func'):
+            options.func()
+
+        # No cmd supplied, print help message
+        else:
+            parser.print_help()
 
     def cmd_list(self):
         directory = garden_app_dir if self.options.app else garden_system_dir
@@ -164,7 +169,7 @@ class GardenTool(object):
         animation = '\\|/-'
         index = 0
         count = 0
-        data = ''
+        data = b''
         for buf in r.iter_content(1024):
             index += 1
             data += buf
@@ -173,7 +178,7 @@ class GardenTool(object):
             sys.stdout.flush()
         print('Download done ({} downloaded)'.format(count))
 
-        return StringIO(data)
+        return BytesIO(data)
 
     def extract(self, fd, directory):
         print('Extracting...')
