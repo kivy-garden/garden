@@ -6,7 +6,7 @@ import zipfile
 import tempfile
 from shutil import rmtree, move
 from os import listdir, getcwd, chdir, makedirs
-from os.path import join, realpath, exists, isdir, expanduser
+from os.path import join, realpath, exists, isdir, expanduser, abspath, dirname
 
 try:
     from cBytesIO import BytesIO
@@ -22,6 +22,12 @@ except ImportError:
     print('Garden tool require requests library.')
     print('Try to "pip install requests" in root')
     sys.exit(1)
+
+try:
+    import kivy
+    garden_kivy_dir = abspath(join(dirname(kivy.__file__), 'garden'))
+except ImportError:
+    garden_kivy_dir = None
 
 
 garden_system_dir = join(expanduser('~'), '.kivy', 'garden')
@@ -40,6 +46,8 @@ class GardenTool(object):
                 help='List all the installed garden packages')
         p.add_argument('--app', action='store_true',
                 help='Use the local app directory (./libs/garden)')
+        p.add_argument('--kivy', action='store_true',
+                help='Use the kivy garden directory (kivy/garden)')
         p.set_defaults(func=self.cmd_list)
 
         p = subparsers.add_parser('search',
@@ -52,6 +60,8 @@ class GardenTool(object):
                 help='Install a garden package')
         p.add_argument('--app', action='store_true',
                 help='Install in the local app directory (./libs/garden)')
+        p.add_argument('--kivy', action='store_true',
+                help='Use the kivy garden directory (kivy/garden)')
         p.add_argument('--upgrade', action='store_true',
                 help='Force the installation')
         p.add_argument('package', nargs=1,
@@ -62,6 +72,8 @@ class GardenTool(object):
                 help='Uninstall a garden package')
         p.add_argument('--app', action='store_true',
                 help='Use the local app directory (./libs/garden)')
+        p.add_argument('--kivy', action='store_true',
+                help='Use the kivy garden directory (kivy/garden)')
         p.add_argument('package', nargs=1,
                 help='Name of the package to uninstall')
         p.set_defaults(func=self.cmd_uninstall)
@@ -75,7 +87,18 @@ class GardenTool(object):
         else:
             parser.print_help()
 
+        if self.options.kivy and garden_kivy_dir is None:
+            print('--kivy provided; cannot find kivy')
+            sys.exit(0)
+
     def cmd_list(self):
+        if self.options.kivy:
+            for filename in listdir(garden_kivy_dir):
+                fullname = join(garden_kivy_dir, filename)
+                if isdir(fullname):
+                    print(fullname)
+            return
+
         directory = garden_app_dir if self.options.app else garden_system_dir
         if not exists(directory):
             return
@@ -101,17 +124,19 @@ class GardenTool(object):
 
     def cmd_install(self):
         opts = self.options
-        opts.package = self.gardenify(opts.package[0])
+        src_package = self.gardenify(opts.package[0])
+        dst_package = opts.package[0] if self.options.kivy else src_package
 
-        garden_dir = garden_app_dir if self.options.app else garden_system_dir
-        dest_dir = join(garden_dir, opts.package)
+        garden_dir = garden_kivy_dir if self.options.kivy else (
+            garden_app_dir if self.options.app else garden_system_dir)
+        dest_dir = join(garden_dir, dst_package)
 
         if exists(dest_dir) and not opts.upgrade:
             print('Garden package already installed in {}'.format(dest_dir))
             print('Use --upgrade to upgrade.')
             sys.exit(0)
 
-        fd = self.download(opts.package)
+        fd = self.download(src_package)
         tempdir = tempfile.mkdtemp(prefix='garden-')
         try:
             self.extract(fd, tempdir)
@@ -123,12 +148,12 @@ class GardenTool(object):
                 print('Removing old version...')
                 rmtree(dest_dir)
 
-            source_directory = join(tempdir, '{}-master'.format(opts.package))
+            source_directory = join(tempdir, '{}-master'.format(src_package))
 
             print('Installing new version...')
             move(source_directory, dest_dir)
 
-            print('Done! {} is installed at: {}'.format(opts.package,
+            print('Done! {} is installed at: {}'.format(src_package,
                     dest_dir))
 
         finally:
@@ -138,12 +163,15 @@ class GardenTool(object):
 
     def cmd_uninstall(self):
         opts = self.options
-        opts.package = self.gardenify(opts.package[0])
-        garden_dir = garden_app_dir if self.options.app else garden_system_dir
-        d = join(garden_dir, opts.package)
+        package = opts.package[0] if self.options.kivy else \
+            self.gardenify(opts.package[0])
+        garden_dir = garden_kivy_dir if self.options.kivy else (
+            garden_app_dir if self.options.app else garden_system_dir)
+
+        d = join(garden_dir, package)
         if not exists(d):
             print('Package {} not installed, nothing to uninstall.'.format(
-                    opts.package))
+                  package))
             sys.exit(0)
 
         print('Deleting {}...'.format(d))
@@ -192,4 +220,3 @@ class GardenTool(object):
 
 if __name__ == '__main__':
     GardenTool().main(sys.argv[1:])
-
