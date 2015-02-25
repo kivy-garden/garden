@@ -118,9 +118,10 @@ class GardenTool(object):
             name = repo['name'].split('.', 1)[-1]
             if pattern and pattern not in name:
                 continue
+            desc = repo['description']
 
             print("{} - {}".format(
-                name, repo['description'].splitlines()[0]))
+                name, desc.splitlines()[0] if desc else 'No description'))
 
     def cmd_install(self):
         opts = self.options
