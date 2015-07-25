@@ -198,8 +198,9 @@ class GardenTool(object):
         index = 0
         count = 0
         data = b''
+
         try:
-        size = int(r.headers['content-length'].strip())
+            size = int(r.headers['content-length'].strip())
         except:
             print('Link for garden package exists, but the package'
                     'seems empty. Try again to download?')
