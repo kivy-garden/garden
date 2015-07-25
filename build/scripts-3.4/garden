@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/home/guido/.Envs/python3_customKivy/bin/python
 
 import sys
 import argparse
@@ -198,13 +198,7 @@ class GardenTool(object):
         index = 0
         count = 0
         data = b''
-        try:
-        size = int(r.headers['content-length'].strip())
-        except:
-            print('Link for garden package exists, but the package'
-                    'seems empty. Try again to download?')
-            sys.exit(1)
-            
+        size = int(r.headers['Content-Length'].strip())
         sys.stdout.write('\nDownloading {}MB): \n'.\
                          format(round(size/1024/1024)))
         for buf in r.iter_content(1024):
