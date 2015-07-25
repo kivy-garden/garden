@@ -1,9 +1,0 @@
-setup.py
-Kivy_Garden.egg-info/PKG-INFO
-Kivy_Garden.egg-info/SOURCES.txt
-Kivy_Garden.egg-info/dependency_links.txt
-Kivy_Garden.egg-info/requires.txt
-Kivy_Garden.egg-info/top_level.txt
-bin/garden
-bin/garden.bat
-garden/__init__.py
