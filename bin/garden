@@ -87,7 +87,7 @@ class GardenTool(object):
         else:
             parser.print_help()
 
-        if self.options.kivy and garden_kivy_dir is None:
+        if getattr(self.options, 'kivy', False) and garden_kivy_dir is None:
             print('--kivy provided; cannot find kivy')
             sys.exit(0)
 
