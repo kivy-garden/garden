@@ -203,7 +203,7 @@ class GardenTool(object):
             index += 1
             data += buf
             count += len(buf)
-            print('Progression', count, animation[index % len(animation)], '\r')
+            print('Progression', count, animation[index % len(animation)], end = '\r')
             sys.stdout.flush()
         print('Download done ({} downloaded)'.format(count))
 
