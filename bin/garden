@@ -189,7 +189,7 @@ class GardenTool(object):
                 package)
 
         print('Downloading {} ...'.format(url))
-        r = requests.get(url)#, prefetch=False)
+        r = requests.get(url, stream=True)
         if r.status_code != 200:
             print('Unable to find the garden package. (error={})'.format(
                 r.status_code))
