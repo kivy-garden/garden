@@ -5,7 +5,7 @@ import argparse
 import zipfile
 import tempfile
 from shutil import rmtree, move
-from os import listdir, getcwd, chdir, makedirs
+from os import listdir, getcwd, chdir, makedirs, environ
 from os.path import join, realpath, exists, isdir, expanduser, abspath, dirname
 
 try:
@@ -30,7 +30,7 @@ except ImportError:
     garden_kivy_dir = None
 
 
-garden_system_dir = join(expanduser('~'), '.kivy', 'garden')
+garden_system_dir = os.environ['KIVY_HOME']
 garden_app_dir = join(realpath(getcwd()), 'libs', 'garden')
 
 
