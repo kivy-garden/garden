@@ -31,6 +31,8 @@ except ImportError:
 
 
 garden_system_dir = join(expanduser('~'), '.kivy', 'garden')
+if sys.platform == 'darwin':
+    garden_system_dir = realpath(join(sys.argv[0],'../../../.kivy/garden'))
 garden_app_dir = join(realpath(getcwd()), 'libs', 'garden')
 
 
