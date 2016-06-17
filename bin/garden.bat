@@ -1,1 +1,1 @@
-python.exe %~dp0garden %*
+python.exe "%~dp0garden" %*
