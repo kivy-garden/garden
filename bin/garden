@@ -185,7 +185,7 @@ class GardenTool(object):
         return package
 
     def download(self, package):
-        url = 'http://github.com/kivy-garden/{}/archive/master.zip'.format(
+        url = 'https://github.com/kivy-garden/{}/archive/master.zip'.format(
                 package)
 
         print('Downloading {} ...'.format(url))
