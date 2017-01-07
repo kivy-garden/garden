@@ -1,19 +1,37 @@
+'''
+This script serves as a Kivy Garden page generator. It looks for all existing
+Kivy-Garden flowers via GitHub API, creates a nice grid with their screenshots
+(or flower js fallback if not available) and links to their GitHub repository.
+
+Usage:
+
+    Render html output:
+
+        python generate.py
+
+    Rebuild html from cache (without using GitHub API):
+
+        python generate.py --rebuild
+
+    Clean everything (even cache):
+
+        python generate.py --clean
+'''
+
 from __future__ import print_function
+from os.path import sep, join, dirname, abspath, exists
 from distutils.dir_util import copy_tree
+from os import mkdir, remove
 from shutil import rmtree
-from os.path import sep
-import os.path as op
-import itertools
+from re import findall
 import requests
 import json
 import sys
-import re
-import os
 
 api = 'https://api.github.com/users/kivy-garden/'
 raw = 'https://raw.githubusercontent.com/kivy-garden/'
-root = op.join(op.dirname(op.abspath(__file__)), 'source') + sep
-dest = op.join(op.dirname(op.abspath(__file__)), 'build') + sep
+root = join(dirname(abspath(__file__)), 'source')
+dest = join(dirname(abspath(__file__)), 'build')
 exclude = ['garden', 'kivy-garden.github.io']
 
 try:
@@ -21,16 +39,22 @@ try:
         rmtree(dest)
         exit()
     elif sys.argv[1] == '--rebuild':
-        rmtree(op.join(dest, 'html'))
+        rmtree(join(dest, 'html'))
 except IndexError:
     pass
 
 # Templates
-emptysquare = '<td><div class="emptysquare"><a href="$url$"><img src="$scr$"\
- /><span>$text$</span></a></div></td>'
+emptysquare = (
+    '<td><div class="emptysquare"><a href="$url$">'
+    '<img src="$scr$" onerror=\'this.src = "stylesheets/flowerscr.png"\' />'
+    '<span>$text$</span></a></div></td>'
+)
 
-square = '<td><div class="square"><a href="$url$"><img src="$scr$"\
- /><span>$text$</span></a></div></td>'
+square = (
+    '<td><div class="square"><a href="$url$">'
+    '<img src="$scr$" onerror=\'this.src = "stylesheets/flowerscr.png"\' />'
+    '<span>$text$</span></a></div></td>'
+)
 
 template = '''
                 <tr>
@@ -43,44 +67,45 @@ template = '''
 '''
 
 # check folders
-if op.exists(dest):
-    if op.exists(op.join(dest, 'html')):
+if exists(dest):
+    if exists(join(dest, 'html')):
         print('Build already exists! Exiting...')
         exit()
     else:
-        os.mkdir(op.join(dest, 'html'))
+        mkdir(join(dest, 'html'))
 else:
-    os.mkdir(dest)
-    os.mkdir(op.join(dest, 'temp'))
-    os.mkdir(op.join(dest, 'html'))
+    mkdir(dest)
+    mkdir(join(dest, 'temp'))
+    mkdir(join(dest, 'html'))
 
 gallery = ''  # for html output
 flowers = []  # for catching all flowers
 
 page = 1
 while True:
-    url = api+'repos?callback=getPages&page='+str(page)
+    url = api + 'repos?callback=getPages&page=' + str(page)
     leftstrip = 13  # strip this:  /**/getPages(
 
     # if not cached, get data from repository
-    if not op.exists(op.join(dest, 'temp', 'temp' + str(page) + '.txt')):
-        print('Cached data not available, getting data from repo...\n', url)
+    temp_page = 'temp{}.txt'.format(str(page))
+    if not exists(join(dest, 'temp', temp_page)):
+        print('Cached data not available, getting data from repo...\n\t', url)
         r = requests.get(url)
         content = json.loads(r.content[leftstrip:-1])
 
         # cache it https://developer.github.com/v3/search/#rate-limit
-        with open(op.join(dest, 'temp', 'temp'+str(page) + '.txt'), 'w') as f:
+        with open(join(dest, 'temp', temp_page), 'w') as f:
             f.write(json.dumps(content))
     else:
         print('Cached data available...')
-        with open(op.join(dest, 'temp', 'temp'+str(page)+'.txt')) as f:
+        with open(join(dest, 'temp', temp_page)) as f:
             content = json.loads(f.read())
 
     # get pages
     links = content['meta']['Link']
     for link in links:
         if 'last' in link[1]['rel']:
-            last = int(re.findall(r'getPages&page=(\d+)', link[0])[0])
+            last = int(findall(r'getPages&page=(\d+)', link[0])[0])
         else:
             last = int(page)
 
@@ -93,11 +118,12 @@ while True:
 
         # ensure non-empty and allowed name
         if name and name not in exclude:
+            print('Flower -> {}'.format(name))
             flower = {}
             flower['name'] = name
             flower['url'] = d['html_url']
-            # flower['scr'] = ''  # <some screenshot from RAW>
-            flower['scr'] = 'stylesheets/flowerscr.png'
+            flower['scr'] = flower['url'] + '/raw/master/screenshot.png'
+
             flowers.append(flower)
 
     if page < last:
@@ -108,7 +134,7 @@ while True:
 
 flowers = sorted(flowers, key=lambda k: k['name'])
 
-pagination = 5  # rows per page
+pagination = 4  # X + 1 rows per page (append on 0)
 pages = []
 round = 0
 start = 0
@@ -122,7 +148,7 @@ while True:
         _rows = [square, emptysquare, square, emptysquare, square]
 
     # get row values
-    first_five = flowers[start:start+5]
+    first_five = flowers[start:start + 5]
     start += 5
 
     # fill up the template
@@ -135,46 +161,51 @@ while True:
             rows.append(row)
         except IndexError:
             pass
-    for i in range(5):
+    for i, row in enumerate(_rows):
         try:
-            tpl = tpl.replace('$'+str(i)+'$', rows[i])
+            tpl = tpl.replace('${}$'.format(str(i)), rows[i])
         except IndexError:
-            tpl = tpl.replace('$'+str(i)+'$', '')
+            tpl = tpl.replace('${}$'.format(str(i)), '')
 
     round += 1
     if pagination:
         gallery += tpl
         pagination -= 1
     else:
+        gallery += tpl
         pages.append(gallery)
         gallery = ''
-        pagination = 5
+        pagination = 4
     if len(first_five) < 5:
         pages.append(gallery)
         break
 
 # write pages
 for i, page in enumerate(pages):
-    with open(root+'temp_gallery.html') as f:
+    with open(join(root, 'gallery.template.html')) as f:
         content = f.read()
     if i != 0:
-        file = op.join(dest, 'html', 'gallery'+str(i+1)+'.html')
+        file = join(dest, 'html', 'gallery{}.html'.format(str(i + 1)))
     else:
-        file = op.join(dest, 'html', 'gallery.html')
+        file = join(dest, 'html', 'gallery.html')
     with open(file, 'w') as f:
         content = content.replace('$CONTENT$', page)
         if i == 1:
             content = content.replace('$PREV$', 'gallery.html')
             content = content.replace('<!--$P$', '').replace('$P$-->', '')
         elif i > 0:
-            content = content.replace('$PREV$', 'gallery'+str(i)+'.html')
+            content = content.replace(
+                '$PREV$', 'gallery{}.html'.format(str(i))
+            )
             content = content.replace('<!--$P$', '').replace('$P$-->', '')
         if i != len(pages) - 1:
-            content = content.replace('$NEXT$', 'gallery'+str(i+2)+'.html')
+            content = content.replace(
+                '$NEXT$', 'gallery{}.html'.format(str(i + 2))
+            )
             content = content.replace('<!--$N$', '').replace('$N$-->', '')
         f.write(content)
 
 # copy garden source
-copy_tree(root, op.join(dest, 'html'))
-os.remove(op.join(dest, 'html', 'temp_gallery.html'))
+copy_tree(root, join(dest, 'html'))
+remove(join(dest, 'html', 'gallery.template.html'))
 print('Build complete')
