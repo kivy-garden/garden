@@ -79,6 +79,7 @@ class GardenTool(object):
         p.set_defaults(func=self.cmd_uninstall)
 
         self.options = options = parser.parse_args(argv)
+        options.package = [p.lower() for p in options.package]
 
         if hasattr(options, 'func'):
             options.func()
