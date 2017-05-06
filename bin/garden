@@ -78,17 +78,19 @@ class GardenTool(object):
                 help='Name of the package to uninstall')
         p.set_defaults(func=self.cmd_uninstall)
 
-        self.options = options = parser.parse_args(argv)
-        options.package = [p.lower() for p in options.package]
+        self.options = parser.parse_args(argv)
 
-        if hasattr(options, 'func'):
-            options.func()
+        if hasattr(self.options, 'package'):
+          self.options.package = [p.lower() for p in self.options.package]
+
+        if hasattr(self.options, 'func'):
+            self.options.func()
 
         # No cmd supplied, print help message
         else:
             parser.print_help()
 
-        if getattr(self.options, 'kivy', False) and garden_kivy_dir is None:
+        if hasattr(self.options, 'kivy') and garden_kivy_dir is None:
             print('--kivy provided; cannot find kivy')
             sys.exit(0)
 
