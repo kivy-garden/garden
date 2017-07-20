@@ -91,3 +91,13 @@
 	color: #202530;
 	border-left: 2px solid #2a7cdf;
 }
+
+.square > a, a:link, a:visited {
+	color: #595959;
+	text-decoration: none;
+}
+
+.emptysquare > a, a:link, a:visited {
+	color: #595959;
+	text-decoration: none;
+}

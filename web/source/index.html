@@ -102,22 +102,25 @@
 
             <ol>
                 <li>
-                    <p>Make sure you have `requests` installed:
+                    <p>Make sure you have <code>requests</code> installed:
 
                         <pre>sudo pip install requests</pre>
 
                     </p>
                 </li>
                 <li>
-                    <p>Run the Garden tool present in <strong>
-                    kivy_install_dir/kivy/tools/</strong>:
-                        <pre>$ ./garden list</pre>
+                    <p>Install <code>kivy-garden</code> if you don't have it:
+                        <pre>pip install kivy-garden</pre>
+                        Make sure you have the folder that contains
+                        <code>garden</code> file on your <code>PATH</code>
+                        (or <code>cd</code> to the folder).
+                        <pre>$ garden list</pre>
                         To list all the installed garden packages
-                        <pre>$ ./garden search</pre>
-                        To search garden packages on github
-                        <pre>$ ./garden install package_name</pre>
+                        <pre>$ garden search</pre>
+                        To search garden packages on GitHub
+                        <pre>$ garden install package_name</pre>
                         To install a garden package
-                        <pre>$ ./garden uninstall package_name</pre>
+                        <pre>$ garden uninstall package_name</pre>
                         To uninstall a garden package
                     </p>
                 </li>
@@ -129,16 +132,19 @@
                     </p>
                 </li>
                 <li>
-                    <p>By default the installation is done in ~/.kivy/garden/garden.widgetname
-                    so that all kivy apps can use the widget once installed.</p>
+                    <p>By default the installation is done in
+                    <code>~/.kivy/garden/garden.widgetname</code> so that all
+                    kivy apps can use the widget once installed.</p>
                     <p>To include the package in your mobile distribution, you
-                    should install the garden package with --app command line
-                    argument, this way the package is downloaded and installed
-                    in your app directory and thus included in your apk.</p>
+                    should install the garden package with <code>--app</code>
+                    command line argument, this way the package is downloaded
+                    and installed in your app directory and thus included in
+                    your apk.</p>
                     <p><pre>cd my_app_dir
 /path/to/kivy_instalation/kivy/tools/garden install --app graph</pre>
                     </p>
-                    </p>This should install the Graph Widget in my_app_dir/libs/garden/garden.widgetname
+                    </p>This should install the Graph Widget in
+                    <code>my_app_dir/libs/garden/garden.widgetname</code>
                     </p>
                 </li>
             </ol>
@@ -186,9 +192,9 @@
                 </li>
                 <li>
                     <p>Use the <a href="http://kivy.org/docs/api-kivy.modules.monitor.html">
-                    Monitor module</a> to ensure that your widget can maintain
-                    a FPS rate above 60, ensuring smooth interaction with the
-                    user.</p>
+                    <code>Monitor</code> module</a> to ensure that your widget
+                    can maintain a FPS rate above 60, ensuring smooth
+                    interaction with the user.</p>
                 </li>
                 <li>
                     <p>Follow the <a href="http://wiki.python.org/moin/PythonSpeed/PerformanceTips">
@@ -196,8 +202,9 @@
                     minimum lookups, avoiding lookups in loops...</p>
                 </li>
                 <li>
-                    <p>As a way of self-organizing widgets, add a screenshot to
-                    your repo showcasing the widget.</p>
+                    <p>As a way of self-organizing widgets, add a screenshot
+                    named "<code>screenshot.png</code>" to the root of your repo
+                    showcasing the widget.</p>
                 </li>
                 <li>
                     <p>Use tags instead of a directory structure to categorize
@@ -205,12 +212,12 @@
                 </li>
             </ol>
             <p>Note: you must have a GitHub account to open a ticket. You can
-            create one for free <a href="https://github.com/">here</a>. New
-            repository.</p>
+            create one for free <a href="https://github.com/">here</a>.</p>
 
             <h2 id="issues">Other issues</h2>
 
-            <p>For all other issues, please open a ticket.</p>
+            <p>For all other issues, please open a ticket in the appropriate
+            <a href="https://github.com/kivy-garden">repository</a>.</p>
 
             <h2 id="spam">Disabling notification spam</h2>
 
