@@ -189,24 +189,34 @@ class GardenTool(object):
         url = 'https://github.com/kivy-garden/{}/archive/master.zip'.format(
                 package)
 
-        print('Downloading {} ...'.format(url))
+        print('Preparing to download {} ...'.format(url))
         r = requests.get(url)#, prefetch=False)
         if r.status_code != 200:
             print('Unable to find the garden package. (error={})'.format(
                 r.status_code))
             sys.exit(1)
 
-        animation = '\\|/-'
         index = 0
         count = 0
         data = b''
+
+        try:
+            size = int(r.headers['content-length'].strip())
+        except:
+            print('Link for garden package exists, but the package'
+                    ' seems empty. Try again to download?')
+            sys.exit(1)
+            
+        sys.stdout.write('\nDownloading {}MB: \n'.\
+                         format(round(size/1024/1024)))
         for buf in r.iter_content(1024):
             index += 1
             data += buf
             count += len(buf)
-            print('Progression', count, animation[index % len(animation)], '\r')
+            sys.stdout.write('\r{}%'.format(round(count*100/size)))
             sys.stdout.flush()
-        print('Download done ({} downloaded)'.format(count))
+        sys.stdout.write('\nDownload done ({}MB downloaded)'.\
+                     format(round(count/1024/1024)))
 
         return BytesIO(data)
 
