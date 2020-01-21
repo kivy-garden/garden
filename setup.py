@@ -4,7 +4,7 @@ use_setuptools()
 from setuptools import setup
 
 setup(
-        name='Kivy Garden',
+        name='Kivy-Garden',
         version='0.1.4',
         license='MIT',
         packages=['garden'],
